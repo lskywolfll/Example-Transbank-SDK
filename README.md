@@ -36,3 +36,12 @@ npm install
 node src/index.js
 ```
 La aplicación se ejecutará en [http://localhost:3000](http://localhost:3000) (y fallará en caso de que el puerto 3000 no esté disponible)
+
+
+### WIP
+
+Se crearan todos los metodos de pago por transbank
+
+### Metodos Listos
+
+WebPayPlusNormal

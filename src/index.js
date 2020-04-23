@@ -18,12 +18,12 @@ app.get("/", (req, res) => {
  |--------------------------------------------------------------------------
  */
 app.get("/webpay-normal/init", (req, res) => {
-  const transbank = new WebpayPlusController;
+  const transbank = new WebpayPlusController();
   transbank.WebpayPlusNormal(req, res);
 })
 
 app.post("/webpay-normal/response", (req, res) => {
-  const transbank = new WebpayPlusController;
+  const transbank = new WebpayPlusController();
   transbank.ResponseWebpayPlusNormal(req, res);
 })
 

@@ -8,16 +8,17 @@ class WebpayPlusController {
   constructor() {
     this.configuration;
     this.method;
-    this.response;
   }
 
   WebpayPlusNormal(req, res) {
-    this.configuration = Transbank.Configuration.forTestingWebpayPlusNormal()
-    this.method = new Transbank.Webpay(this.configuration).getNormalTransaction()
-    this.response = this.method;
-    let url = `${req.protocol}://${req.get('host')}`
+    this.configuration = Transbank.Configuration.forTestingWebpayPlusNormal();
+    this.method = new Transbank.Webpay(this.configuration).getNormalTransaction();
+    this.response = new Transbank.Webpay(this.configuration);
+    let url = `${req.protocol}://${req.get('host')}`;
+    let amount = 1500;
 
-    let amount = 1500
+    console.log(req.get('referer'));
+
     this.method.initTransaction(
       amount,
       getRandomInt(10000, 99999),
@@ -27,19 +28,27 @@ class WebpayPlusController {
     ).then((data) => {
       transactions[data.token] = { amount: amount }
       const { url, token } = data;
-      res.render("redirect-transbank",
-        { url: url, token: token, inputName: "TBK_TOKEN" })
-    })
-  }
+      const pago = `${url}?token_ws=${token}`
+
+      res.status(200).json({
+        pago
+      });
+
+      // res.render("redirect-transbank",
+      //   { url: url, token: token, inputName: "TBK_TOKEN" })
+    });
+
+  };
 
   ResponseWebpayPlusNormal(req, res) {
     // Esta inicialización que se repite, es mejor llevarla a nu lugar en donde
     // se pueda reutilizar. Por simplicidad, en este ejemplo está el código
     // duplicado en cada método
+    const Webpay = new Transbank.Webpay(this.configuration).getNormalTransaction();
 
-    let token = req.body.token_ws
+    const token = req.body.token_ws;
 
-    this.response.getTransactionResult(token).then(response => {
+    Webpay.getTransactionResult(token).then(response => {
       transactions[token] = response
       const { urlRedirection } = response;
       res.render("redirect-transbank",
@@ -69,7 +78,7 @@ class WebpayPlusController {
     })
   }
 
-  static finish(req, res) {
+  finish(req, res) {
     let status = null;
     let transaction = null;
 
@@ -92,7 +101,19 @@ class WebpayPlusController {
       return res.status(404).send("Not found.");
     }
 
-    return res.render("webpay-normal/finish", { transaction, status })
+    // return res.status(201).json({
+    //   transaction,
+    //   status
+    // });
+
+    io.emit('transaction', {
+      transaction,
+      status
+    });
+
+    return res.status(201).json({
+      ok:true
+    });
 
   }
 
